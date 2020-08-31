@@ -57,14 +57,14 @@ void setup()
   SPIFFS.begin();
 
   buildFileCount();
-
-  Serial.println(getFileName(0));
-  Serial.println(getFileName(1));
-  Serial.println(getFileName(2));
-  
-  Serial.printf("Sample MP3 playback begins...\n");
   audioLogger = &Serial;
-  playbackFile = new AudioFileSourceSPIFFS("/pno-cs.mp3");
+
+  String filename = getFileName(1);
+  int str_len = filename.length() + 1; 
+  char char_array[str_len];
+  filename.toCharArray(char_array, str_len);
+  
+  playbackFile = new AudioFileSourceSPIFFS(char_array);
   id3 = new AudioFileSourceID3(playbackFile);
   id3->RegisterMetadataCB(MDCallback, (void*)"ID3TAG");
   
