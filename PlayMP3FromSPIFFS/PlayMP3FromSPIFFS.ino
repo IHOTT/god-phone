@@ -23,7 +23,6 @@ AudioFileSourceID3 *id3;
 
 int fileCount;
 
-
 #define bclk_pin 32
 #define wclk_pin 25
 #define dout_pin 27
@@ -57,20 +56,27 @@ void setup()
   delay(1000);
   SPIFFS.begin();
 
-  buildFileArray();
+  buildFileCount();
+
+  Serial.println(getFileName(0));
+  Serial.println(getFileName(1));
+  Serial.println(getFileName(2));
   
   Serial.printf("Sample MP3 playback begins...\n");
   audioLogger = &Serial;
   playbackFile = new AudioFileSourceSPIFFS("/pno-cs.mp3");
   id3 = new AudioFileSourceID3(playbackFile);
   id3->RegisterMetadataCB(MDCallback, (void*)"ID3TAG");
+  
   out = new AudioOutputI2S();
   out->SetPinout(bclk_pin, wclk_pin, dout_pin);
+  out->SetOutputModeMono(true);
+  
   mp3 = new AudioGeneratorMP3();
   mp3->begin(id3, out);
 }
 
-void buildFileArray(){
+void buildFileCount(){
   fileCount = 0;
   Serial.println("Listing files in SPIFFS...");
 
@@ -85,6 +91,20 @@ void buildFileArray(){
 
   Serial.print("Number of audio files in SPIFFS: ");
   Serial.println(fileCount);
+}
+
+String getFileName(int index){
+  File root = SPIFFS.open("/");
+  File file = root.openNextFile();
+  String filename = file.name();
+  
+  while(index > 0){
+      file = root.openNextFile();
+      index--;
+      filename = file.name();
+  }
+  
+  return filename;
 }
 
 void loop()
